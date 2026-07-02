@@ -32,7 +32,7 @@ export function PaymentQR({ total }: PaymentQRProps) {
 
       <div className="mx-auto mt-6 max-w-xs overflow-hidden rounded-xl border border-gray-200 bg-white p-3">
         <Image
-          src="/gpay-qr.png"
+          src="/payment-qr.png.jpeg"
           alt="GPay QR Code"
           width={300}
           height={300}
