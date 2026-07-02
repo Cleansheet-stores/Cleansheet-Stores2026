@@ -1,6 +1,6 @@
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import { NextResponse } from "next/server";
+import cloudinary from "@/lib/cloudinary";
+import { Buffer } from "buffer";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { parseImages, slugify } from "@/lib/utils";
@@ -9,17 +9,20 @@ import { SIZES } from "@/lib/constants";
 async function saveUploadedImages(formData: FormData): Promise<string[]> {
   const files = formData.getAll("images") as File[];
   const urls: string[] = [];
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  await mkdir(uploadDir, { recursive: true });
 
   for (const file of files) {
     if (!file.size) continue;
+
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const ext = path.extname(file.name) || ".jpg";
-    const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
-    await writeFile(path.join(uploadDir, filename), buffer);
-    urls.push(`/uploads/${filename}`);
+
+    const base64 = `data:${file.type};base64,${buffer.toString("base64")}`;
+
+    const result = await cloudinary.uploader.upload(base64, {
+      folder: "cleansheet-products",
+    });
+
+    urls.push(result.secure_url);
   }
 
   return urls;
